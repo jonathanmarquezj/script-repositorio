@@ -13,11 +13,20 @@ echo "-------------------------------";
 #PARA BUSCAR EL REPOSITORIO EN EL PAQUETE
 # | grep $1 | awk -F '\t' '{print $1}'
 
+#VARIABLES
+repositorio=$1
 
-for paquete in $(dpkg -l | grep '^ii' | cut -d ' ' -f 3); do  # Bucle for para recorrer los paquetes instalados
-  apt-cache showpkg $paquete | head -3 | grep -v '^Versions' | sed -e 's/Package: //;' | paste - - ; # El paquete con la version y el repositorio
-done | grep $1 | awk -F '\t' '{print $1}' #buscamos si esta el repositorio en el paquete
+#QUITAMOS EL HTTP:// DEL REPOSITORIO
+if [[ $repositorio == *http://* ]]
+then
+   repositorio=$(echo $repositorio | cut -d / -f3 )
+fi
 
+#MOSTRAR LOS PAQUETES DEL REPOSITORIO
+for paquete in $(dpkg -l | grep '^ii' | cut -d ' ' -f 3)
+do  # Bucle for para recorrer los paquetes instalados
+  apt-cache showpkg $paquete | head -3 | grep -v '^Versions' | sed -e 's/Package: //;' | paste - -  # El paquete con la version y el repositorio
+done | grep $repositorio | awk -F '\t' '{print $1}' #buscamos si esta el repositorio en el paquete
 
 
 echo "-------------------------------";
